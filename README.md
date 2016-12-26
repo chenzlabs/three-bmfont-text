@@ -6,9 +6,9 @@
 
 [(click for demo)](https://jam3.github.io/three-bmfont-text/test) - [(source)](test/test-shader.js)
 
-Bitmap font rendering for ThreeJS, batching glyphs into a single BufferGeometry. Supports word-wrapping, letter spacing, kerning, signed distance fields with standard derivatives, multi-texture fonts, and more. About 12kb after minification.
+Bitmap font rendering for ThreeJS, batching glyphs into a single BufferGeometry. Supports word-wrapping, letter spacing, kerning, [signed distance fields](./docs/sdf.md) with standard derivatives, [multi-channel signed distance fields](./docs/sdf.md#msdf-shader), multi-texture fonts, and more. About 12kb after minification.
 
-Works on Three r69-73, and possibly more.
+Works on Three r69-73, r79, and possibly more.
 
 Below is an example that uses [load-bmfont](https://www.npmjs.com/package/load-bmfont) to parse BMFont files on the fly with XHR:
 
@@ -35,17 +35,18 @@ loadFont('fonts/Arial.fnt', function(err, font) {
   console.log(geometry.layout.descender)
     
   // the texture atlas containing our glyphs
-  var texture = THREE.ImageUtils.loadTexture('fonts/Arial.png')
+  var textureLoader = new THREE.TextureLoader();
+  textureLoader.load('fonts/Arial.png', function (texture) {
+    // we can use a simple ThreeJS material
+    var material = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      color: 0xaaffff
+    })
 
-  // we can use a simple ThreeJS material
-  var material = new THREE.MeshBasicMaterial({
-    map: texture,
-    transparent: true,
-    color: 0xaaffff
+    // now do something with our mesh!
+    var mesh = new THREE.Mesh(geometry, material)
   })
-
-  // now do something with our mesh!
-  var mesh = new THREE.Mesh(geometry, material)
 })
 ```
 
@@ -122,6 +123,9 @@ npm run test-3d
 # 2d bitmap rendering
 npm run test-2d
 
+# 2D MSDF rendering
+npm run test-msdf
+
 # multi-page rendering
 npm run test-multi
 
@@ -143,7 +147,7 @@ npm run build
 
 See [docs/assets.md](docs/assets.md)
 
-### Signed Distance Field Rendering
+### (Multi-)Signed Distance Field Rendering
 
 See [docs/sdf.md](docs/sdf.md)
 
@@ -156,6 +160,9 @@ See [docs/multi.md](docs/multi.md)
 See [text-modules](https://github.com/mattdesl/text-modules) for more text and font related tools.
 
 ## Change Log
+
+- `2.0.1`
+  - Added `shaders/msdf.js` and docs around MSDF usage
 
 - `2.0.0`
   - now uses [three-buffer-vertex-data](https://github.com/Jam3/three-buffer-vertex-data) to handle some ThreeJS version differences; this may lead to a slight memory increase
